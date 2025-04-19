@@ -114,7 +114,7 @@ import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.util.calculateSubsidy
-import no.uio.ifi.in2000.team54.util.isNumber
+import no.uio.ifi.in2000.team54.util.isNumeric
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -1106,7 +1106,7 @@ private fun NumberInputField(
         modifier = Modifier.fillMaxWidth(),
         containerModifier = modifier,
         value = value,
-        onValueChange = { if (it.isNumber()) onValueChange(it) },
+        onValueChange = { if (it.isNumeric()) onValueChange(it) },
         label = label,
         placeholder = placeholder,
         keyboardOptions = KeyboardOptions(
