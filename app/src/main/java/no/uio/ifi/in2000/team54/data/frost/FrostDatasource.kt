@@ -50,63 +50,12 @@ class FrostDatasource {
     private val referenceTime = "2022-12-31/2024-12-31"
 
 
-    private suspend fun fetchNearestSource(
-        coordinates: Coordinates,
-        element: Elements,
-    ): MutableMap<Elements, MutableList<String>> {
-
-        try {
-            val response: HttpResponse =
-                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=$element&nearestmaxcount=5") {
-                    header(HttpHeaders.Authorization, authHeader)
-                    header(HttpHeaders.Accept, "application/json")
-                }
-
-            if (response.status.value != 200) { // Cannot find nearest sensor for ALL urls, try individual URLS now
-                return mutableMapOf()
-
-            } else {
-                val body: List<SensorSystem> = response.body<SourceResponse>().data
-
-                // maps the element name to a list of strings (sensorids)
-                body.forEach{value ->
-                    sensorMap.getOrPut(element) { mutableListOf() }.add(value.id)
-                }
-                return sensorMap
-            }
-        } catch (e: Exception) {
-            Log.e("fetchNearestSource", "Error fetching nearest source: ${e.message}", e)
-
-            return mutableMapOf()
-        }
-
-    }
-
-
     suspend fun fetchObservationDataFromFrost(
         coordinates: Coordinates,
         elementName: Elements,
     ): List<ObservationData> {
-        sensorMap = fetchNearestSource(coordinates, elementName)
-
-
-        // stores the list of sensorIds in this variable
-        var sensorIds = sensorMap[elementName]
-        Log.i("TestingAllSensors", sensorIds.toString())
-        var sensorUrl = ""
-
-
-        if (sensorIds != null) {
-            // updates the sensorUrl variable with the sensor ids in the sensorIds element
-            // between every element, but the last, a %2C is added.
-            sensorIds.forEach { value ->
-                sensorUrl += if (value == nameMap.values.last()) {
-                    value
-                } else {
-                    "$value%2C"
-                }
-            }
-        }
+        val start = System.currentTimeMillis()
+        val sensorUrl = ""
 
         var response: HttpResponse
 
@@ -147,6 +96,7 @@ class FrostDatasource {
         // stores the response from the api in to the ObservationResponse data class
         val observationResponse: ObservationResponse = response.body()
 
+        println("TIME : ${System.currentTimeMillis()-start}")
         return observationResponse.data
     }
 }
