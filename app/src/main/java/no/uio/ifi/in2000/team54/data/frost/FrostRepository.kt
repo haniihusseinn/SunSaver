@@ -14,7 +14,7 @@ class FrostRepository() {
 
     suspend fun getData( coordinates: Coordinates, elementName: Elements ): Map<String, Double> {
 
-        return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates,elementName))
+        return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(elementName))
     }
 
 
