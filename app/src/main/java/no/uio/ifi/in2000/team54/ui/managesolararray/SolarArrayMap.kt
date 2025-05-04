@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Pos
@@ -44,6 +46,7 @@ fun SolarArrayMap(
 ) {
     val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
 
+    val coroutineScope = rememberCoroutineScope()
     MapboxMap(
         Modifier
             .fillMaxSize(),
@@ -54,6 +57,14 @@ fun SolarArrayMap(
         },
         scaleBar = {},
         onMapClickListener = { point ->
+            if (viewModel.adressChanged && roofSections.isNotEmpty()) {
+                coroutineScope.launch {
+                    snackbarState.showSnackbar(
+                        "Adressen er endret. Slett gamle tak før du legger til nye."
+                    )
+                }
+                return@MapboxMap false
+            }
             val targetRoofSection = mapRoofSectionsState.roofSections.find {
                 it.geometry.contains(point)
             }

@@ -41,6 +41,9 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapAddress: StateFlow<AddressState> = _mapAddress.asStateFlow()
     val mapSearchAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
 
+     var adressChanged: Boolean = false
+
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val mapRoofSections = _mapAddress
         .filter { state -> state.address != null }
@@ -94,6 +97,7 @@ class ManageSolarArrayViewModel : ViewModel() {
         val pos: Pos = Pos.fromPoint(solarArray?.coordinates!!.toPoint())
         queryAddressAtPos(pos)
         _mapSearchAddress.value = SearchAddressState(solarArray.address)
+        adressChanged =  true
     }
 
     fun addSolarArray(newSolarArray: SolarArray) {

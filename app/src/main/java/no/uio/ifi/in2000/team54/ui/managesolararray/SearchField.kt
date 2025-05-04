@@ -81,6 +81,7 @@ fun SearchField(
                     .zoom(19.0)
                     .build()
             )
+            searchAddress.value = solarEntity!!.address
         } else {
             searchAddress.value = ""
         }
