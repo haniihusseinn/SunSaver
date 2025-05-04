@@ -65,6 +65,7 @@ fun SolarArrayMap(
                 }
                 return@MapboxMap false
             }
+            viewModel.adressChanged = false // change it to false again after takflate is deleted.
             val targetRoofSection = mapRoofSectionsState.roofSections.find {
                 it.geometry.contains(point)
             }

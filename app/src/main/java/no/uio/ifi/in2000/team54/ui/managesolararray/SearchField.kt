@@ -107,6 +107,7 @@ fun SearchField(
             onAddressChange = { address ->
                 searchAddress.value = address
                 viewModel.setSearchAddress(address)
+                viewModel.adressChanged =  true // change it to true everytime address changes
             },
             onDone = {
                 keyboardController?.hide()

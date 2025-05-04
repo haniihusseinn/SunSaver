@@ -97,7 +97,6 @@ class ManageSolarArrayViewModel : ViewModel() {
         val pos: Pos = Pos.fromPoint(solarArray?.coordinates!!.toPoint())
         queryAddressAtPos(pos)
         _mapSearchAddress.value = SearchAddressState(solarArray.address)
-        adressChanged =  true
     }
 
     fun addSolarArray(newSolarArray: SolarArray) {
