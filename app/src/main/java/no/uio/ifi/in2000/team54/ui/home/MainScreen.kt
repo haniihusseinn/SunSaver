@@ -55,11 +55,11 @@ fun MainScreen() {
             composable("settings") { SettingsScreen() }
 
             composable(
-                "editsolararrays/{arrayName}",
-                arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
+                "editsolararrays/{arrayId}",
+                arguments = listOf(navArgument("arrayId") { type = NavType.LongType })
             ) { backStackEntry ->
-                val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""
-                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayName)
+                val arrayId = backStackEntry.arguments?.getLong("arrayId") ?: -1L
+                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayId)
             }
         }
     }
