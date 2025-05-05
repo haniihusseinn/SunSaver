@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -21,8 +22,10 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
+import no.uio.ifi.in2000.team54.network.NetworkObserver
 
-class ManageSolarArrayViewModel : ViewModel() {
+class ManageSolarArrayViewModel(private val networkObserver: NetworkObserver) : ViewModel() {
+
     private val repository: BuildingRepository = BuildingRepository()
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
@@ -40,6 +43,26 @@ class ManageSolarArrayViewModel : ViewModel() {
 
     val mapAddress: StateFlow<AddressState> = _mapAddress.asStateFlow()
     val mapSearchAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
+
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline = _isOnline.asStateFlow()
+
+    init {
+
+        _isOnline.value = networkObserver.isNetworkAvailable()
+
+        observeNetwork()
+    }
+
+    fun observeNetwork()  {
+
+        viewModelScope.launch {
+
+            networkObserver.isConnected.collectLatest { connected ->
+                _isOnline.value = connected
+            }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val mapRoofSections = _mapAddress
