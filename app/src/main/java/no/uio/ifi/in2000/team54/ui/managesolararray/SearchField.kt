@@ -83,7 +83,7 @@ fun SearchField(
             )
             searchAddress.value = solarEntity!!.address
         } else {
-            searchAddress.value = ""
+            viewModel.setSearchAddress("")
         }
     }
     val selectSuggestion: (Address) -> Unit = remember {
@@ -103,9 +103,8 @@ fun SearchField(
     }
     Column {
         SearchTextField(
-            address = searchAddress.value,
+            address = addressState.value.query,
             onAddressChange = { address ->
-                searchAddress.value = address
                 viewModel.setSearchAddress(address)
                 viewModel.adressChanged =  true // change it to true everytime address changes
             },

@@ -111,6 +111,7 @@ class ManageSolarArrayViewModel : ViewModel() {
             setMapAddress(address)
         }
     }
+
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray){
         viewModelScope.launch {
@@ -118,12 +119,12 @@ class ManageSolarArrayViewModel : ViewModel() {
         }
     }
 
-    fun getSolarArray(name: String){
+    fun getSolarArray(id: Long){
         viewModelScope.launch {
             _currentSolarArray.value = _sunSaverRepository.getAllSolarArrays()
                 .filter { it.isNotEmpty() }
                 .first()
-                .find { it.name == name }
+                .find { it.id == id }
         }
     }
 
