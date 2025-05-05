@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -47,6 +49,9 @@ class ManageSolarArrayViewModel(private val networkObserver: NetworkObserver) : 
     private val _isOnline = MutableStateFlow(true)
     val isOnline = _isOnline.asStateFlow()
 
+    private val _uiEvents = MutableSharedFlow<UiEvent>()
+    val uiEvents = _uiEvents.asSharedFlow()
+
     init {
 
         _isOnline.value = networkObserver.isNetworkAvailable()
@@ -73,6 +78,7 @@ class ManageSolarArrayViewModel(private val networkObserver: NetworkObserver) : 
                 MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
 
             } catch (e: Exception) {
+                _uiEvents.emit(UiEvent.ShowError(e.message.toString()))
                 delay(1000) // delayed so that the Building API gets time to respond
                 // if it fails to get the roof information, don't display any in the map
                 MapRoofSectionsState(emptyList(), true)
@@ -91,6 +97,7 @@ class ManageSolarArrayViewModel(private val networkObserver: NetworkObserver) : 
             val suggestions = try {
                 repository.getAddressSuggestions(state.query)
             } catch (e: Exception) {
+                _uiEvents.emit(UiEvent.ShowError(e.message.toString()))
                 emptyList() // could not find any addresses for the users input
             }
             AddressSuggestionsState(suggestions)
@@ -166,3 +173,7 @@ data class SearchAddressState(
 data class AddressSuggestionsState(
     val suggestions: List<Address>,
 )
+
+sealed class UiEvent {
+    data class ShowError(val message: String) : UiEvent()
+}

@@ -10,6 +10,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import no.uio.ifi.in2000.team54.domain.Coordinates
@@ -63,8 +64,8 @@ class FrostDatasource {
                     header(HttpHeaders.Accept, "application/json")
                 }
 
-            if (response.status.value != 200) { // Cannot find nearest sensor for ALL urls, try individual URLS now
-                return mutableMapOf()
+            if (response.status != HttpStatusCode.OK) { // Cannot find nearest sensor for ALL urls, try individual URLS now
+                throw Exception("Ingen sensorer i nærheten.")
 
             } else {
                 val body: List<SensorSystem> = response.body<SourceResponse>().data
@@ -76,9 +77,9 @@ class FrostDatasource {
                 return sensorMap
             }
         } catch (e: Exception) {
-            Log.e("fetchNearestSource", "Error fetching nearest source: ${e.message}", e)
 
-            return mutableMapOf()
+            throw Exception("Feil ved henting av sensorer")
+
         }
 
     }
@@ -89,8 +90,15 @@ class FrostDatasource {
         elementName: Elements,
     ): List<ObservationData> {
 
-        sensorMap = fetchNearestSource(coordinates, elementName)
+        try {
 
+            sensorMap = fetchNearestSource(coordinates, elementName)
+
+        } catch (e: Exception) {
+
+            throw Exception(e.message)
+
+        }
 
         // stores the list of sensorIds in this variable
         var sensorIds = sensorMap[elementName]

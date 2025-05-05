@@ -30,63 +30,101 @@ class BuildingDataSource {
     }
     
     suspend fun getAddressSuggestions(address: String): List<Address> {
-        val response = httpClient.get("https://ws.geonorge.no/adresser/v1/sok") {
-            parameter("sok", address)
-            parameter("fuzzy", true)
-            parameter("utkoordsys", 4258)
-            parameter("treffPerSide", 10)
-            parameter("side", 0)
-            parameter("asciiKompatibel", true)
-        }
+        try {
+            val response = httpClient.get("https://ws.geonorge.no/adresser/v1/sok") {
+                parameter("sok", address)
+                parameter("fuzzy", true)
+                parameter("utkoordsys", 4258)
+                parameter("treffPerSide", 10)
+                parameter("side", 0)
+                parameter("asciiKompatibel", true)
+            }
 
-        if (response.status != HttpStatusCode.OK) {
-            return emptyList()
-        }
+            if (response.status != HttpStatusCode.OK) {
+                return emptyList()
+            }
+            return response.body<AddressSuggestionsResponse>().suggestions
 
-        return response.body<AddressSuggestionsResponse>().suggestions
+        } catch (e: Exception) {
+            throw Exception("Feil ved hentning av adresseforslag")
+        }
     }
 
     suspend fun getAddressFromPos(pos: Pos): List<Address> {
-        val response = httpClient.get("https://ws.geonorge.no/adresser/v1/punktsok") {
-            parameter("lat", pos.lat)
-            parameter("lon", pos.lon)
-            parameter("radius", 10)
-            parameter("utkoordsys", 4258)
-            parameter("side", 0)
-            parameter("asciiKompatibel", true)
-        }
+        try {
+            val response = httpClient.get("https://ws.geonorge.no/adresser/v1/punktsok") {
+                parameter("lat", pos.lat)
+                parameter("lon", pos.lon)
+                parameter("radius", 10)
+                parameter("utkoordsys", 4258)
+                parameter("side", 0)
+                parameter("asciiKompatibel", true)
+            }
 
-        if (response.status != HttpStatusCode.OK) {
-            return emptyList()
-        }
+            if (response.status != HttpStatusCode.OK) {
+                throw Exception("Feil ved hentning av adresse fra posisjon")
+            }
+            return response.body<AddressSuggestionsResponse>().suggestions
 
-        return response.body<AddressSuggestionsResponse>().suggestions
+        } catch (e: Exception) {
+
+            throw Exception("Noe gikk galt ved hentning av adresse fra posisjon")
+        }
     }
 
     suspend fun getCadastreId(address: Address): Long? {
-        val response = httpClient.get(
-            "https://seeiendom.kartverket.no/api/matrikkelenhet/" +
-                    "${address.communityNumber}/" +
-                    "${address.cadastralNumber}/" +
-                    "${address.propertyNumber}"
-        )
 
-        return Json.parseToJsonElement(response.bodyAsText()).jsonObject["matrikkelenhetId"]?.jsonPrimitive?.long
+        try {
+            val response = httpClient.get(
+                "https://seeiendom.kartverket.no/api/matrikkelenhet/" +
+                        "${address.communityNumber}/" +
+                        "${address.cadastralNumber}/" +
+                        "${address.propertyNumber}"
+            )
+
+            if (response.status != HttpStatusCode.OK) {
+                throw Exception("Feil ved hentning av data")
+            }
+            return Json.parseToJsonElement(response.bodyAsText()).jsonObject["matrikkelenhetId"]?.jsonPrimitive?.long
+
+        } catch (e: Exception) {
+            throw Exception("Noe gikk galt ved hentning av data")
+        }
     }
 
     suspend fun getBuildingIds(cadastreId: Long): List<String> {
-        val response = httpClient.get("https://seeiendom.kartverket.no/api/bygningerForMatrikkelenhet/$cadastreId")
-        return Json.parseToJsonElement(response.bodyAsText()).jsonArray
-            .mapNotNull { it.jsonObject["bygningsnummer"] }
-            .map { it.jsonPrimitive.content }
+
+        try {
+            val response = httpClient.get("https://seeiendom.kartverket.no/api/bygningerForMatrikkelenhet/$cadastreId")
+
+            if (response.status != HttpStatusCode.OK) {
+                throw Exception("Feil ved hentning av bygning ID-er.")
+            }
+            return Json.parseToJsonElement(response.bodyAsText()).jsonArray
+                .mapNotNull { it.jsonObject["bygningsnummer"] }
+                .map { it.jsonPrimitive.content }
+
+        } catch (e: Exception) {
+            throw Exception("Noe gikk galt ved hentning av bygning ID-er.")
+        }
     }
 
     suspend fun getRoofSections(buildingId: String): List<MapRoofSection> {
-        val response = httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
-            parameter("buildingIds", buildingId)
-        }
 
-        return response.body<RoofSectionsResponse>().roofSections
+         try {
+            val response = httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
+                parameter("buildingIds", buildingId)
+            }
+
+             if (response.status != HttpStatusCode.OK) {
+                 throw Exception("Feil ved hentning av takflater.")
+             }
+
+            return response.body<RoofSectionsResponse>().roofSections
+
+        } catch (e: Exception) {
+            throw Exception("Noe gikk galt ved hentning av takflater.")
+        }
     }
 }
 

@@ -219,12 +219,12 @@ class HomeViewModel(private val networkObserver: NetworkObserver) : ViewModel() 
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å hente data om været"
+                        loadingMessage =  e.message.toString()
                     )
                 }
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å hente data om været"
+                        loadingMessage = e.message.toString()
                     )
                 }
             } finally {
@@ -338,7 +338,7 @@ class HomeViewModel(private val networkObserver: NetworkObserver) : ViewModel() 
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å laste inn strømpriser"
+                        loadingMessage = ex.message.toString()
                     )
                 }
             } finally {

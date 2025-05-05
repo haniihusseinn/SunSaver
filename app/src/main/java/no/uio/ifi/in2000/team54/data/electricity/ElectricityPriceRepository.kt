@@ -61,8 +61,14 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
         for (i in 0..<days) {
             if (days in 2..30 && i % 3 != 0) continue //Limit requests
             if (days > 30 && i % 14 != 0) continue //Limit requests
-            datasource.getElectricityPrices(area, currentDate).forEach {
-                nokPerKwh.add(it.nokPrKiloWh)
+
+            try {
+                datasource.getElectricityPrices(area, currentDate).forEach {
+                    nokPerKwh.add(it.nokPrKiloWh)
+                }
+            } catch (e: Exception) {
+
+                throw Exception("Det skjedde en feil ved henting av strømpriser.")
             }
             currentDate = decrementDate(currentDate)
         }

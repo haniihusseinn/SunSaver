@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,30 +21,40 @@ import androidx.navigation.navArgument
 import no.uio.ifi.in2000.team54.ui.composables.Snackbar
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
-import no.uio.ifi.in2000.team54.network.MyApplication
 import no.uio.ifi.in2000.team54.network.NetworkObserver
-
+import no.uio.ifi.in2000.team54.ui.managesolararray.UiEvent
 
 @Composable
 fun MainScreen() {
 
-    val context = MyApplication.appContext
+    val context = LocalContext.current
     val networkObserver = remember { NetworkObserver(context) }
 
     val navController = rememberNavController()
 
     val manageSolarArrayViewModel = remember { ManageSolarArrayViewModel(networkObserver) }
-    val homeViewModel = remember { HomeViewModel( networkObserver) }
+    val homeViewModel = remember { HomeViewModel(networkObserver) }
 
     val snackbarState = remember { SnackbarHostState() }
     val homeIsOnline by homeViewModel.isOnline.collectAsState(initial = true)
     val arrayIsOnline by manageSolarArrayViewModel.isOnline.collectAsState(initial = true)
 
+    LaunchedEffect(manageSolarArrayViewModel.uiEvents) {
+        manageSolarArrayViewModel.uiEvents.collect { event ->
+            when (event) {
+                is UiEvent.ShowError -> {
+                    snackbarState.showSnackbar(event.message)
+                }
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { Snackbar(snackbarState) },
         bottomBar = {
-            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            val currentRoute =
+                navController.currentBackStackEntryAsState().value?.destination?.route
             if (currentRoute.equals("managesolararray") || currentRoute.equals("editsolararrays/{arrayName}")) {
                 return@Scaffold
             }
@@ -59,7 +70,7 @@ fun MainScreen() {
 
                 snackbarState.showSnackbar("Ingen internettforbindelse")
             }
-    }
+        }
 
 
         NavHost(
@@ -68,14 +79,14 @@ fun MainScreen() {
             modifier = Modifier.padding(innerpadding)
         ) {
             composable("home") { HomeScreen(homeViewModel = homeViewModel, navController = navController) }
-            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeViewModel) }
+            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
 
             composable(
                 "editsolararrays/{arrayName}",
                 arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
             ) { backStackEntry ->
                 val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""
-                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeViewModel, arrayName)
+                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayName)
             }
         }
     }
