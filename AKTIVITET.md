@@ -67,7 +67,7 @@ flowchart TD;
     ClickAddress(Select a house on the map)
     ShowRoofSections(Show available roof sections)
     ChooseRoofSections(Add desired roof sections)
-    AddRoofManually{Add from map or add manuallly?}
+    AddRoofManually{Add from map or add manually?}
 
     AddArea(Write area)
     AddDirection(Write direction)
