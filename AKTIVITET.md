@@ -2,12 +2,12 @@
 
 ### Creating a solar array 
 
-**Name**: Create a solar array
-**Pre - conditions**: User has not created a solar array before
+**Name**: Create/edit a solar array
+**Pre - conditions**: User has not created or edited a solar array before 
 **Post - conditions**: User has created the solar array, it is saved in the homescreen and they are able to edit it.
+<br/>
 
-
-**Main flow**:
+**Main flow**:<br/>
 1. User opens the app
 2. The system shows the homescreen 
 3. User clicks on the pluss button 
@@ -25,10 +25,14 @@
 15. The user provides a name for the solar array
 16. The user provides their electricity usage
 17. The user saves the solar array
-18. The system navigates back to the home screen. 
+18. The system navigates back to the home screen. <br/>
+<br/>
 
+**Alternative flow**:<br/>
+3.1 The user clicks on the edit button on an existing solar array
+3.2 The system navigates to the edit screen
+3.3 The system zooms in on the address in the map 
 
-**Alternative flow**:
 4.1 The user navigates to their address on the map
 4.2 The user clicks on a house
 4.3 The system returns to step 7
@@ -43,6 +47,7 @@
 10.2 The user edits the chosen element 
 10.3 The user saves their edited roof section
 10.4 The system returns to step 12
+<br/>
 
 
 ```mermaid
@@ -55,6 +60,10 @@ flowchart TD;
     MapAndDropdown(Shows a map and a drop-down menu)
     Search{Search address or navigate on map?}
 
+    EditOrCreate{Create a new solar array or edit an existing one?}
+    EditSolarArray(User clicks on edit button)
+    AddressZoom(System zooms in on address in the map)
+    
     ClickAddress(Select a house on the map)
     ShowRoofSections(Show available roof sections)
     ChooseRoofSections(Add desired roof sections)
@@ -64,7 +73,6 @@ flowchart TD;
     AddDirection(Write direction)
     AddAngle(Write angle)
     AddPanels(Write number of panels)
-
 
     ClickRoofSection(Click on chosen roof section)
     EditRoofSection{Edit roof section?}
@@ -84,9 +92,15 @@ flowchart TD;
     SavedHomeScreen(Shows homescreen with saved solar array)
 
     Start --> HomeScreen
-    HomeScreen --> PlusButton
+    HomeScreen --> EditOrCreate
+    EditOrCreate --Create--> PlusButton
+    EditOrCreate --Edit--> EditSolarArray
+
     PlusButton --> MapAndDropdown
     MapAndDropdown --> Search 
+
+    EditSolarArray --> AddressZoom 
+    AddressZoom --> ShowRoofSections 
 
     Search --Navigate on map--> ClickAddress --> ShowRoofSections 
     Search --Search on searchfield --> ShowRoofSections
@@ -130,30 +144,31 @@ flowchart TD;
 
 ```
 
-### Navigating between solar arrays and deleting deleting them
-
+### Navigating between solar arrays and deleting them
+<br/>
 
 **Name**: Navigating between solar arrays and deleting them
 **Pre - conditions**: User opens the app to the homescreen with two existing solar arrays 
 **Post - conditions**: User has successfully navigated between the solar arrays and deleted one.
+<br/>
 
-
-**Main flow**:
+**Main flow**:<br/>
 1. User clicks on the second solar array 
 2. System retrieves data for the second solar array
 3. System displays the graph, savings and price recoup components for second solar array 
 4. User deletes the first solar array
 5. System navigates user back to the first solar array
 6. System displays the previously retrieved data 
+<br/>
 
-
-**Alternative flow**:
+**Alternative flow**:<br/>
 1.1 System has not yet retrieved data for the first solar array
 1.2 System shows an error and prevents user from navigating to the second solar array.
 1.3 User waits for data be retrieved
 1.4 System retrieves data
 1.5 User clicks on second solar array
 1.6 System returns to step 2
+<br/>
 
 
 ```mermaid
